@@ -14,7 +14,7 @@ os.environ['LANGCHAIN_API_KEY']=os.getenv('LANGCHAIN_API_KEY')
 os.environ['LANGCHAIN_PROJECT']=os.getenv('LANGCHAIN_PROJECT')
 
 # Configuração do modelo de chat
-llm = ChatGroq(model='Gemma2-9b-It', temperature=0.6)
+llm = ChatGroq(model='Gemma2-9b-It', temperature=0.8)
 
 # Configuração da página com ícone e título
 st.set_page_config(page_title="The Bible Explorer", page_icon="📖")
