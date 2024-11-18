@@ -2,12 +2,14 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
-from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_core.runnables import RunnableWithMessageHistory, RunnablePassthrough
 from langchain_community.chat_message_histories import ChatMessageHistory
+from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, trim_messages
 import uuid
 import json
+from operator import itemgetter
 
 # Load environment variables
 load_dotenv()
@@ -41,35 +43,56 @@ prompt = ChatPromptTemplate(
     ]
 )
 
-# Combine the prompt with the LLM model
-chain = prompt | llm
+# Function to add messages to session history
+def add_message_to_history(session_id, role, content):
+    """Adds a message to the session's message history."""
+    if f'messages_{session_id}' not in st.session_state:
+        st.session_state[f'messages_{session_id}'] = []
+    st.session_state[f'messages_{session_id}'].append({'role': role, 'content': content})
+
+# Trim messages to ensure token limit is respected
+trimmer = trim_messages(
+    max_tokens=1000,
+    strategy="last",
+    token_counter=llm,
+    include_system=True,
+    allow_partial=False,
+    start_on="human"
+)
+
+# Combine the prompt and LLM with the trimmer
+chain = (
+    RunnablePassthrough.assign(messages=itemgetter('messages'))
+    | prompt
+    | trimmer  # Trimmer acts only on input to the LLM
+    | llm
+)
+
+# Initialize session
+if 'user_id' not in st.session_state:
+    st.session_state['user_id'] = str(uuid.uuid4())
+
+session_id = st.session_state['user_id']
 
 # Load translation texts from a JSON file
 with open('translations.json', 'r', encoding='utf-8') as f:
     translations = json.load(f)
 
 # Streamlit interface
-# Configuração da página com ícone e título
 st.set_page_config(page_title="The Bible Explorer", page_icon="📖")
 
 # Language selection in sidebar
 glanguage = st.sidebar.selectbox("Choose your language / Escolha seu idioma / Elija su idioma:", ["English", "Português", "Español"])
 
-# Exibir o título, cabeçalho e subtítulo no idioma selecionado
+# Display title, header, and subtitle in the selected language
 st.title(translations['titles'][glanguage])
 st.markdown(f"<p style='font-size:16px;'>{translations['subtitles'][glanguage]}</p>", unsafe_allow_html=True)
 
-# Configuração do Disclaimer com um expander
+# Disclaimer with an expander
 with st.expander("Disclaimer"):
     st.write(translations['disclaimers'][glanguage])
 
-# Initialize unique session ID for each user
-if 'user_id' not in st.session_state:
-    st.session_state['user_id'] = str(uuid.uuid4())
-
-session_id = st.session_state['user_id']
-
-# Ensure session-specific data is initialized
+# Initialize session-specific data
 if f'messages_{session_id}' not in st.session_state:
     st.session_state[f'messages_{session_id}'] = [
         {'role': 'assistant', 'content': "Hi! Ask me a question about the Bible and Jesus Christ."}
@@ -80,9 +103,12 @@ for message in st.session_state[f'messages_{session_id}']:
     with st.chat_message(message['role']):
         st.write(message['content'])
 
-# Handle user input and generate a response
+# Handle user input
 if user_input := st.chat_input("Your question here..."):
-    # Display the user's message
+    # Add user message to history
+    add_message_to_history(session_id, 'user', user_input)
+
+    # Display user message
     st.chat_message('user').write(user_input)
 
     # Generate response using the LLM chain
@@ -94,6 +120,7 @@ if user_input := st.chat_input("Your question here..."):
                     HumanMessage(content=msg['content']) if msg['role'] == 'user' else SystemMessage(content=msg['content'])
                     for msg in st.session_state[f'messages_{session_id}']
                 ]
+
                 # Invoke the chain with the updated messages
                 response = chain.invoke(
                     {
@@ -101,8 +128,11 @@ if user_input := st.chat_input("Your question here..."):
                         'messages': messages
                     }
                 )
-                # Add the assistant's response to the session history
-                st.session_state[f'messages_{session_id}'].append({'role': 'assistant', 'content': response.content})
+
+                # Add assistant's response to the session history
+                add_message_to_history(session_id, 'assistant', response.content)
+
+                # Display the response
                 st.write(response.content)
             except Exception as e:
                 st.error(f"An error occurred: {e}")
