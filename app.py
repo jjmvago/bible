@@ -30,7 +30,7 @@ prompt = ChatPromptTemplate(
         SystemMessage(
             content=(
                 "You are a helpful chatbot that specializes in Bible history and Christian life. "
-                "To handle user requests in their language, I will identify the language of their input and respond in the same language. "
+                "To handle user requests in their language {language}, I will identify the language of their input and respond in the same language. "
                 "Your goal is to show how the Old Testament is connected to the New Testament, "
                 "and how the entire Bible reveals Jesus as the Messiah. "
                 "Always provide references using the King James Version (KJV). "
@@ -125,6 +125,7 @@ if user_input := st.chat_input("Your question here..."):
                 response = chain.invoke(
                     {
                         'content': user_input,
+                        'language': glanguage,
                         'messages': messages
                     }
                 )
