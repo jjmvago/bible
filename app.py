@@ -20,7 +20,7 @@ os.environ['LANGCHAIN_TRACING_V2'] = os.getenv('LANGCHAIN_TRACING_V2')
 os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY')
 os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
 
-os.environ["GROQ_API_KEY"] = st.secrets("GROQ_API_KEY")
+os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 
 # Create the model
 llm = ChatGroq(model='Gemma2-9b-It', temperature=0.6)
