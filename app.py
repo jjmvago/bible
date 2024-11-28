@@ -23,7 +23,7 @@ os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 
 # Create the model
-llm = ChatGroq(model='gemma2-9b-it')
+llm = ChatGroq(model='gemma-7b-it')
 
 # Define the chat prompt template
 prompt = ChatPromptTemplate(
