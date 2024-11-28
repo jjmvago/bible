@@ -23,7 +23,15 @@ os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 
 # Create the model
-llm = ChatGroq(model="Gemma2-9b-It", temperature=0.6)
+#llm = ChatGroq(model="Gemma2-9b-It", temperature=0.6)
+try:
+    llm = ChatGroq(model="Gemma2-9b-It", temperature=0.6)
+    response = llm.generate({"messages": [{"role": "user", "content": "Hello!"}]})
+    print(response)
+except Exception as e:
+    import traceback
+    print("Error initializing ChatGroq or generating response:")
+    print(traceback.format_exc())
 
 # Define the chat prompt template
 prompt = ChatPromptTemplate(
