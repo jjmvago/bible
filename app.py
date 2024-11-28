@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 # Set environment variables
-os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
 os.environ['LANGCHAIN_TRACING_V2'] = os.getenv('LANGCHAIN_TRACING_V2')
 os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY')
 os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
@@ -24,8 +24,8 @@ os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
 os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 
 # Create the model
-#llm = ChatGroq(model="Gemma2-9b-It", temperature=0.6)
-llm = ChatOpenAI()
+llm = ChatGroq(model="Gemma2-9b-It", temperature=0.6)
+#llm = ChatOpenAI()
 
 # Define the chat prompt template
 prompt = ChatPromptTemplate(
