@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 # Set environment variables
-os.environ['GROQ_API_KEY'] = os.getenv('GROQ_API_KEY')
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
 os.environ['LANGCHAIN_TRACING_V2'] = os.getenv('LANGCHAIN_TRACING_V2')
 os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY')
 os.environ['LANGCHAIN_PROJECT'] = os.getenv('LANGCHAIN_PROJECT')
